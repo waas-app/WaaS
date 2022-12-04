@@ -1,10 +1,11 @@
-package config
+package util
 
 import (
 	"context"
 	"os"
 	"strings"
 
+	"github.com/hjoshi123/WaaS/config"
 	"github.com/spf13/viper"
 	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ import (
 var logger *zap.Logger
 var logLevel zapcore.Level
 
-func init() {
+func InitLogger() {
 	viper.AutomaticEnv()
 	loggerConfig := zap.NewProductionConfig()
 	// make Test env to only log error level
@@ -35,7 +36,7 @@ func init() {
 
 	logger, err = loggerConfig.Build(zap.Fields(
 		zap.Int("pid", os.Getpid()),
-		zap.String("env", viper.GetString("environment")),
+		zap.String("env", config.Spec.Environment),
 	),
 	)
 
@@ -56,5 +57,5 @@ func Logger(ctx context.Context) *otelzap.LoggerWithCtx {
 }
 
 func IsDevelopment() bool {
-	return strings.EqualFold(viper.GetString("environment"), Development)
+	return strings.EqualFold(config.Spec.Environment, config.Development)
 }
