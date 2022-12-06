@@ -5,6 +5,7 @@ const (
 )
 
 type Config struct {
+	OTLPEndpoint  string `mapstructure:"otlp_endpoint"`
 	Environment   string `mapstructure:"environment"`
 	AdminUserName string `mapstructure:"admin_username"`
 	AdminPassword string `mapstructure:"admin_password"`

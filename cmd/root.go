@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/hjoshi123/WaaS/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 var (
@@ -15,7 +18,7 @@ var (
 		Use:   "waas",
 		Short: "waas is a command line tool for interacting with the Wireguard",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			InitConfig()
+			InitConfig(cmd.Context())
 		},
 	}
 	cfgFile string
@@ -23,6 +26,7 @@ var (
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.waas.yaml)")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.OTLPEndpoint, "OTLP_ENDPOINT", "", "OTLP endpoint")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.Environment, "environment", "", "environment to run in")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminUserName, "WG_ADMIN_USERNAME", "admin", "admin username")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminPassword, "WG_ADMIN_PASSWORD", "admin", "admin password")
@@ -54,15 +58,33 @@ func init() {
 	viper.BindPFlag("vpn-allowedIPs", rootCmd.PersistentFlags().Lookup("VPN_ALLOWED_IPS"))
 	viper.BindPFlag("dns-enabled", rootCmd.PersistentFlags().Lookup("DNS_ENABLED"))
 	viper.BindPFlag("dns-upstream", rootCmd.PersistentFlags().Lookup("DNS_UPSTREAM"))
+	viper.BindPFlag("otlp_endpoint", rootCmd.PersistentFlags().Lookup("OTLP_ENDPOINT"))
 
 	rootCmd.AddCommand(serve)
 }
 
 func Execute() error {
-	return rootCmd.Execute()
+	// create new context from root command
+	file := new(os.File)
+	var err error
+	if config.Spec.OTLPEndpoint == "" {
+		file, err = os.Create("traces.txt")
+		if err != nil {
+			util.Logger(rootCmd.Context()).Error("failed to create file", zap.Error(err))
+			return err
+		}
+		defer file.Close()
+	}
+	ctx, tCleanup, err := util.InitOTEL(rootCmd.Context(), "true", "waas", true, file)
+	if err != nil {
+		util.Logger(rootCmd.Context()).Error("failed to initialize opentelemetry", zap.Error(err))
+		return err
+	}
+	defer tCleanup(rootCmd.Context())
+	return rootCmd.ExecuteContext(ctx)
 }
 
-func InitConfig() {
+func InitConfig(ctx context.Context) {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -88,4 +110,12 @@ func InitConfig() {
 	}
 
 	util.InitLogger()
+
+	if config.Spec.WG.PrivateKey == "" {
+		key, err := wgtypes.GeneratePrivateKey()
+		if err != nil {
+			util.Logger(ctx).Fatal("failed to generate a server private key", zap.Error(err))
+		}
+		config.Spec.WG.PrivateKey = key.String()
+	}
 }
