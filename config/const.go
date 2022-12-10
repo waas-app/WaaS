@@ -6,12 +6,15 @@ const (
 
 type Config struct {
 	OTLPEndpoint  string `mapstructure:"otlp_endpoint"`
+	RootURL       string `mapstructure:"root_url"`
 	Environment   string `mapstructure:"environment"`
 	AdminUserName string `mapstructure:"admin_username"`
 	AdminPassword string `mapstructure:"admin_password"`
 	ExternalHost  string `mapstructure:"externalHost"`
 	Storage       string `mapstructure:"storage"`
 	Port          int    `mapstructure:"port"`
+	SessionSecret string `mapstructure:"session_secret"`
+	CookieDomain  string `mapstructure:"cookie_domain"`
 	WG            struct {
 		// Set this to false to disable the embedded wireguard
 		// server. This is useful for development environments

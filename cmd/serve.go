@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gorilla/mux"
 	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/ip"
 	"github.com/hjoshi123/WaaS/util"
@@ -78,6 +79,8 @@ func RunServe(cmd *cobra.Command, args []string) error {
 
 		defer dns.Close()
 	}
+
+	router := mux.NewRouter()
 
 	return nil
 }

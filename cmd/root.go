@@ -42,6 +42,9 @@ func init() {
 	rootCmd.PersistentFlags().StringArrayVar(&config.Spec.VPN.AllowedIPs, "VPN_ALLOWED_IPS", []string{"0.0.0.0/0"}, "allowed ips to run wireguard on")
 	rootCmd.PersistentFlags().BoolVar(&config.Spec.DNS.Enabled, "DNS_ENABLED", true, "dns to run wireguard on")
 	rootCmd.PersistentFlags().StringArrayVar(&config.Spec.DNS.Upstream, "DNS_UPSTREAM", []string{"1.1.1.1"}, "upstream dns to run wireguard on")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.RootURL, "ROOT_URL", "http://localhost:3000", "root url to run wireguard on")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.SessionSecret, "SESSION_SECRET", "3bcf9f7cbc479b854f6877e917f82df03110db179d121f0c00bfd3afaa28f52eaff20af628b1e67caf9b7b39648e1c892df11036f9d2f2f767ede807d4c2779", "session secret")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.CookieDomain, "COOKIE_DOMAIN", "localhost", "cookie domain")
 
 	viper.BindPFlag("environment", rootCmd.PersistentFlags().Lookup("environment"))
 	viper.BindPFlag("admin_username", rootCmd.PersistentFlags().Lookup("WG_ADMIN_USERNAME"))
@@ -59,6 +62,9 @@ func init() {
 	viper.BindPFlag("dns-enabled", rootCmd.PersistentFlags().Lookup("DNS_ENABLED"))
 	viper.BindPFlag("dns-upstream", rootCmd.PersistentFlags().Lookup("DNS_UPSTREAM"))
 	viper.BindPFlag("otlp_endpoint", rootCmd.PersistentFlags().Lookup("OTLP_ENDPOINT"))
+	viper.BindPFlag("root_url", rootCmd.PersistentFlags().Lookup("ROOT_URL"))
+	viper.BindPFlag("session_secret", rootCmd.PersistentFlags().Lookup("SESSION_SECRET"))
+	viper.BindPFlag("cookie_domain", rootCmd.PersistentFlags().Lookup("COOKIE_DOMAIN"))
 
 	rootCmd.AddCommand(serve)
 }

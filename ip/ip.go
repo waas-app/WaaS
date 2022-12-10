@@ -12,7 +12,7 @@ import (
 
 func GetWireGuardServerIP(cidr string) *net.IPNet {
 	serverIP, serverSubnet := ParseCIDR(cidr)
-	serverSubnet.IP = nextIP(serverIP.Mask(serverSubnet.Mask))
+	serverSubnet.IP = NextIP(serverIP.Mask(serverSubnet.Mask))
 	return serverSubnet
 }
 
@@ -29,7 +29,7 @@ func ParseIP(ip string) net.IP {
 	return netip
 }
 
-func nextIP(ip net.IP) net.IP {
+func NextIP(ip net.IP) net.IP {
 	next := make([]byte, len(ip))
 	copy(next, ip)
 	for j := len(next) - 1; j >= 0; j-- {
