@@ -81,7 +81,7 @@ func Execute() error {
 		}
 		defer file.Close()
 	}
-	ctx, tCleanup, err := util.InitOTEL(rootCmd.Context(), "true", "waas", true, file)
+	ctx, tCleanup, err := util.InitOTEL(rootCmd.Context(), "true", config.ServiceName, true, file)
 	if err != nil {
 		util.Logger(rootCmd.Context()).Error("failed to initialize opentelemetry", zap.Error(err))
 		return err
@@ -100,6 +100,7 @@ func InitConfig(ctx context.Context) {
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
+		viper.SetConfigType("yml")
 		viper.SetConfigName(".waas")
 	}
 

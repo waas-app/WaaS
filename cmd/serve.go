@@ -2,9 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/hjoshi123/WaaS/config"
+	"github.com/hjoshi123/WaaS/controller"
+	"github.com/hjoshi123/WaaS/helpers/device"
+	"github.com/hjoshi123/WaaS/infra"
+	"github.com/hjoshi123/WaaS/infra/middlewares"
 	"github.com/hjoshi123/WaaS/ip"
 	"github.com/hjoshi123/WaaS/util"
 	"github.com/place1/wg-embed/pkg/wgembed"
@@ -80,7 +85,17 @@ func RunServe(cmd *cobra.Command, args []string) error {
 		defer dns.Close()
 	}
 
-	router := mux.NewRouter()
+	dh := device.NewDeviceHelpers(wg)
+	err = dh.RunSync(ctx)
+	if err != nil {
+		util.Logger(ctx).Fatal("Error running device sync", zap.Error(err))
+		return err
+	}
 
+	router := mux.NewRouter()
+	router.Use(middlewares.Logger)
+	router.Use(middlewares.CheckUser)
+
+	router.Path("/ping").Methods(http.MethodGet).Handler(infra.CustomMux(controller.Ping))
 	return nil
 }

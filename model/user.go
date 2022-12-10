@@ -49,3 +49,5 @@ func (u *User) PutArbitrary(arbitrary map[string]string) {
 }
 
 func (u *User) PutEmail(email string) { u.Email = email }
+
+func (u *User) GetEmail() string { return u.Email }

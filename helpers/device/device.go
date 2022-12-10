@@ -7,11 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/datastore"
 	"github.com/hjoshi123/WaaS/ip"
 	"github.com/hjoshi123/WaaS/model"
+	"github.com/hjoshi123/WaaS/util"
 	"github.com/pkg/errors"
 	"github.com/place1/wg-embed/pkg/wgembed"
+	"go.uber.org/zap"
 )
 
 type DeviceHelpers struct {
@@ -24,8 +27,17 @@ func NewDeviceHelpers(wg wgembed.WireGuardInterface) *DeviceHelpers {
 	return &DeviceHelpers{
 		wg:          wg,
 		deviceStore: datastore.NewDeviceStore(),
-		nextIPLock: sync.Mutex{},
+		nextIPLock:  sync.Mutex{},
 	}
+}
+
+func (dh *DeviceHelpers) RunSync(ctx context.Context) error {
+	if err := dh.sync(ctx); err != nil {
+		util.Logger(ctx).Error("Error syncing devices", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (dh *DeviceHelpers) AddDevice(ctx context.Context, user model.User, name string, publicKey string) (*model.Device, error) {
@@ -33,7 +45,7 @@ func (dh *DeviceHelpers) AddDevice(ctx context.Context, user model.User, name st
 		return nil, errors.New("device name must not be empty")
 	}
 
-	clientAddr, err := dh.nextClientAddress()
+	clientAddr, err := dh.nextClientAddress(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate an ip address for device")
 	}
@@ -58,17 +70,24 @@ func (dh *DeviceHelpers) SaveDevice(ctx context.Context, device *model.Device) e
 	return dh.deviceStore.Save(ctx, device)
 }
 
+func (dh *DeviceHelpers) ListAllDevices(ctx context.Context) ([]*model.Device, error) {
+	return dh.deviceStore.List(ctx, "")
+}
 
-func (dh *DeviceHelpers) nextClientAddress() (string, error) {
+func (dh *DeviceHelpers) ListDevices(ctx context.Context, user string) ([]*model.Device, error) {
+	return dh.deviceStore.List(ctx, user)
+}
+
+func (dh *DeviceHelpers) nextClientAddress(ctx context.Context) (string, error) {
 	dh.nextIPLock.Lock()
 	defer dh.nextIPLock.Unlock()
 
-	devices, err := d.ListDevices("")
+	devices, err := dh.ListDevices(ctx, "")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to list devices")
 	}
 
-	vpnip, vpnsubnet := ip.ParseCIDR(d.cidr)
+	vpnip, vpnsubnet := ip.ParseCIDR(config.Spec.VPN.CIDR)
 	ipaddr := vpnip.Mask(vpnsubnet.Mask)
 
 	// TODO: read up on better ways to allocate client's IP
@@ -95,6 +114,62 @@ func (dh *DeviceHelpers) nextClientAddress() (string, error) {
 func contains(ips []net.IP, target net.IP) bool {
 	for _, ip := range ips {
 		if ip.Equal(target) {
+			return true
+		}
+	}
+	return false
+}
+
+func (dh *DeviceHelpers) DeleteDevice(ctx context.Context, user string, name string) error {
+	device, err := dh.deviceStore.Get(ctx, user, name)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve device")
+	}
+
+	if err := dh.deviceStore.Delete(ctx, device); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (dh *DeviceHelpers) GetByPublicKey(ctx context.Context, publicKey string) (*model.Device, error) {
+	return dh.deviceStore.GetByPublicKey(ctx, publicKey)
+}
+
+func (dh *DeviceHelpers) sync(ctx context.Context) error {
+	devices, err := dh.ListAllDevices(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to list devices")
+	}
+
+	peers, err := dh.wg.ListPeers()
+	if err != nil {
+		return errors.Wrap(err, "failed to list peers")
+	}
+
+	// Remove any peers for devices that are no longer in storage
+	for _, peer := range peers {
+		if !deviceListContains(devices, peer.PublicKey.String()) {
+			if err := dh.wg.RemovePeer(peer.PublicKey.String()); err != nil {
+				util.Logger(ctx).Warn("failed to remove peer during sync:", zap.String("public key:", peer.PublicKey.String()))
+			}
+		}
+	}
+
+	// Add peers for all devices in storage
+	for _, device := range devices {
+		if err := dh.wg.AddPeer(device.PublicKey, device.Address); err != nil {
+			util.Logger(ctx).Warn("failed to remove peer during sync:", zap.String("device name:", device.Name))
+		}
+	}
+
+	return nil
+}
+
+func deviceListContains(devices []*model.Device, publicKey string) bool {
+	for _, device := range devices {
+		if device.PublicKey == publicKey {
 			return true
 		}
 	}

@@ -2,6 +2,8 @@ package config
 
 const (
 	Development string = "development"
+	ServiceName string = "WaaS"
+	CurrentUser string = "currentUser"
 )
 
 type Config struct {
