@@ -14,3 +14,4 @@ vpn:
 dns:
   enabled: true
 otlp_endpoint: 10.0.0.123:4317
+cookie_domain: 10.0.0.24

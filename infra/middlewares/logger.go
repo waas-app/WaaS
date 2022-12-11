@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/urfave/negroni"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/util"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	oteltrace "go.opentelemetry.io/otel/trace"

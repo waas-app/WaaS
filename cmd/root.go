@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )

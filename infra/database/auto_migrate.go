@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/model"
-	"github.com/hjoshi123/WaaS/util"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/model"
+	"github.com/waas-app/WaaS/util"
 	"gorm.io/gorm"
 )
 

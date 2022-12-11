@@ -5,11 +5,11 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/datastore"
-	"github.com/hjoshi123/WaaS/infra/database"
-	"github.com/hjoshi123/WaaS/model"
 	"github.com/volatiletech/authboss/v3"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/datastore"
+	"github.com/waas-app/WaaS/infra/database"
+	"github.com/waas-app/WaaS/model"
 )
 
 type AuthStore struct {

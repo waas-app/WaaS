@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hjoshi123/WaaS/config"
 	"github.com/spf13/viper"
 	"github.com/uptrace/opentelemetry-go-extra/otelzap"
+	"github.com/waas-app/WaaS/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

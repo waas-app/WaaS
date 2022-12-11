@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/datastore"
-	"github.com/hjoshi123/WaaS/ip"
-	"github.com/hjoshi123/WaaS/model"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/pkg/errors"
 	"github.com/place1/wg-embed/pkg/wgembed"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/datastore"
+	"github.com/waas-app/WaaS/ip"
+	"github.com/waas-app/WaaS/model"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 

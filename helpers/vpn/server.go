@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/ip"
-	"github.com/hjoshi123/WaaS/model"
-	"github.com/hjoshi123/WaaS/proto/proto"
 	"github.com/place1/wg-embed/pkg/wgembed"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/ip"
+	"github.com/waas-app/WaaS/model"
+	"github.com/waas-app/WaaS/proto/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

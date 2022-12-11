@@ -9,12 +9,12 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	"github.com/hjoshi123/WaaS/helpers/device"
-	"github.com/hjoshi123/WaaS/helpers/vpn"
-	"github.com/hjoshi123/WaaS/proto/proto"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/place1/wg-embed/pkg/wgembed"
+	"github.com/waas-app/WaaS/helpers/device"
+	"github.com/waas-app/WaaS/helpers/vpn"
+	"github.com/waas-app/WaaS/proto/proto"
+	"github.com/waas-app/WaaS/util"
 	"google.golang.org/grpc"
 )
 

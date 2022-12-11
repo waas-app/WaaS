@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"

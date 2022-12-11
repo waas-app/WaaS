@@ -3,9 +3,9 @@ package users
 import (
 	"context"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/model"
 	"github.com/volatiletech/authboss/v3"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/model"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

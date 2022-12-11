@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hjoshi123/WaaS/util"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )

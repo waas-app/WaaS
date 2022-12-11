@@ -3,10 +3,10 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/hjoshi123/WaaS/helpers/users"
-	"github.com/hjoshi123/WaaS/infra/auth"
-	"github.com/hjoshi123/WaaS/model"
-	"github.com/hjoshi123/WaaS/util"
+	"github.com/waas-app/WaaS/helpers/users"
+	"github.com/waas-app/WaaS/infra/auth"
+	"github.com/waas-app/WaaS/model"
+	"github.com/waas-app/WaaS/util"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"

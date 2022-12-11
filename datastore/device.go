@@ -3,10 +3,10 @@ package datastore
 import (
 	"context"
 
-	"github.com/hjoshi123/WaaS/infra/database"
-	"github.com/hjoshi123/WaaS/model"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/pkg/errors"
+	"github.com/waas-app/WaaS/infra/database"
+	"github.com/waas-app/WaaS/model"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 

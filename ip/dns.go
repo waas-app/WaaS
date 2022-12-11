@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/allegro/bigcache/v3"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/miekg/dns"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 

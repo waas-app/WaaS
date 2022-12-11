@@ -5,12 +5,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/defaults"
 	_ "github.com/volatiletech/authboss/v3/register"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gorilla/securecookie"
-	"github.com/hjoshi123/WaaS/config"
 	"github.com/volatiletech/authboss/v3"
+	"github.com/waas-app/WaaS/config"
 )
 
 var (

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hjoshi123/WaaS/cmd"
+	"github.com/waas-app/WaaS/cmd"
 )
 
 func main() {

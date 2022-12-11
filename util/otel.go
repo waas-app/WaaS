@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hjoshi123/WaaS/config"
+	"github.com/waas-app/WaaS/config"
 	ec2detector "go.opentelemetry.io/contrib/detectors/aws/ec2"
 	ecsdetector "go.opentelemetry.io/contrib/detectors/aws/ecs"
 	"go.opentelemetry.io/otel"

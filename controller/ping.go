@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hjoshi123/WaaS/infra"
+	"github.com/waas-app/WaaS/infra"
 )
 
 type Out struct {

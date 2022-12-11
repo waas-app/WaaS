@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/hjoshi123/WaaS/util"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 

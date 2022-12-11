@@ -1,4 +1,4 @@
-module github.com/hjoshi123/WaaS
+module github.com/waas-app/WaaS
 
 go 1.19
 
@@ -18,6 +18,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.1.17
 	github.com/uptrace/opentelemetry-go-extra/otelzap v0.1.17
+	github.com/urfave/negroni v1.0.0
 	github.com/volatiletech/authboss/v3 v3.2.1
 	go.opentelemetry.io/contrib/detectors/aws/ec2 v1.11.1
 	go.opentelemetry.io/contrib/detectors/aws/ecs v1.11.1
@@ -76,7 +77,6 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.1.17 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelutil v0.1.17 // indirect
-	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/vishvananda/netlink v1.1.0 // indirect
 	github.com/vishvananda/netns v0.0.0-20200520041808-52d707b772fe // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.2 // indirect

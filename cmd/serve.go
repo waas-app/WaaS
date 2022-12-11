@@ -5,18 +5,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/hjoshi123/WaaS/config"
-	"github.com/hjoshi123/WaaS/controller"
-	"github.com/hjoshi123/WaaS/helpers/device"
-	"github.com/hjoshi123/WaaS/infra"
-	"github.com/hjoshi123/WaaS/infra/auth"
-	"github.com/hjoshi123/WaaS/infra/middlewares"
-	"github.com/hjoshi123/WaaS/ip"
-	"github.com/hjoshi123/WaaS/util"
 	"github.com/place1/wg-embed/pkg/wgembed"
 	"github.com/spf13/cobra"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/remember"
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/controller"
+	"github.com/waas-app/WaaS/helpers/device"
+	"github.com/waas-app/WaaS/infra"
+	"github.com/waas-app/WaaS/infra/auth"
+	"github.com/waas-app/WaaS/infra/middlewares"
+	"github.com/waas-app/WaaS/ip"
+	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
 
@@ -106,7 +106,7 @@ func RunServe(cmd *cobra.Command, args []string) error {
 	router.Path("/ping").Methods(http.MethodGet).Handler(infra.CustomMux(controller.Ping))
 	a := router.PathPrefix("/").Subrouter()
 	a.Use(authboss.ModuleListMiddleware(ab))
-	a.PathPrefix("/auth").Handler(http.StripPrefix("/auth", ab.Config.Core.Router))
+	a.PathPrefix("/auth").Handler(ab.LoadClientStateMiddleware(http.StripPrefix("/auth", ab.Config.Core.Router)))
 
 	site := router.PathPrefix("/api").Subrouter()
 	site.Use(authboss.Middleware2(ab, authboss.RequireNone, authboss.RespondUnauthorized))
