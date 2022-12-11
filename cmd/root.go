@@ -17,16 +17,17 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "waas",
 		Short: "waas is a command line tool for interacting with the Wireguard",
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			InitConfig(cmd.Context())
-		},
+		// PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// 	InitConfig(cmd.Context())
+		// },
 	}
 	cfgFile string
 )
 
 func init() {
+	// cobra.OnInitialize(InitConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.waas.yaml)")
-	rootCmd.PersistentFlags().StringVar(&config.Spec.OTLPEndpoint, "OTLP_ENDPOINT", "", "OTLP endpoint")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.OTLPEndpoint, "OTLP_ENDPOINT", "10.0.0.123:4317", "OTLP endpoint")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.Environment, "environment", "", "environment to run in")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminUserName, "WG_ADMIN_USERNAME", "admin", "admin username")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminPassword, "WG_ADMIN_PASSWORD", "admin", "admin password")
@@ -81,27 +82,31 @@ func Execute() error {
 		}
 		defer file.Close()
 	}
-	ctx, tCleanup, err := util.InitOTEL(rootCmd.Context(), "true", config.ServiceName, true, file)
+
+	ctx := context.Background()
+	if rootCmd.Context() == nil {
+		rootCmd.SetContext(ctx)
+	}
+	ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
 	if err != nil {
-		util.Logger(rootCmd.Context()).Error("failed to initialize opentelemetry", zap.Error(err))
+		util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
 		return err
 	}
-	defer tCleanup(rootCmd.Context())
+	defer tCleanup(ctx)
 	return rootCmd.ExecuteContext(ctx)
 }
 
-func InitConfig(ctx context.Context) {
+func InitConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		home, err := os.UserHomeDir()
+		wd, err := os.Getwd()
 		cobra.CheckErr(err)
 
 		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
+		viper.AddConfigPath(wd)
 		viper.SetConfigType("yml")
-		viper.SetConfigName(".waas")
+		viper.SetConfigName("waas")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -121,8 +126,9 @@ func InitConfig(ctx context.Context) {
 	if config.Spec.WG.PrivateKey == "" {
 		key, err := wgtypes.GeneratePrivateKey()
 		if err != nil {
-			util.Logger(ctx).Fatal("failed to generate a server private key", zap.Error(err))
+			util.Logger(context.TODO()).Fatal("failed to generate a server private key", zap.Error(err))
 		}
 		config.Spec.WG.PrivateKey = key.String()
 	}
+
 }

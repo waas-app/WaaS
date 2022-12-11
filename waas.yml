@@ -1,0 +1,16 @@
+environment: development
+admin_username: admin@wireguard.com
+admin_password: HelloW@@s
+wg:
+  enabled: true
+  port: 51810
+  interface: wg0
+root_url: http://10.0.0.24:3000
+port: 8000
+storage: postgresql://waas:WaasPassw0rd@10.0.0.24:5432/waas
+vpn:
+  cidr: 192.168.2.0/24
+  gatewayInterface: ens18
+dns:
+  enabled: true
+otlp_endpoint: 10.0.0.123:4317

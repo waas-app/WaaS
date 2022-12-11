@@ -1,1 +1,3 @@
 waas
+*.env
+.stfolder

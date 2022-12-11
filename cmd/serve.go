@@ -9,11 +9,14 @@ import (
 	"github.com/hjoshi123/WaaS/controller"
 	"github.com/hjoshi123/WaaS/helpers/device"
 	"github.com/hjoshi123/WaaS/infra"
+	"github.com/hjoshi123/WaaS/infra/auth"
 	"github.com/hjoshi123/WaaS/infra/middlewares"
 	"github.com/hjoshi123/WaaS/ip"
 	"github.com/hjoshi123/WaaS/util"
 	"github.com/place1/wg-embed/pkg/wgembed"
 	"github.com/spf13/cobra"
+	"github.com/volatiletech/authboss/v3"
+	"github.com/volatiletech/authboss/v3/remember"
 	"go.uber.org/zap"
 )
 
@@ -92,10 +95,35 @@ func RunServe(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	auth.InitializeAuthBoss()
+
 	router := mux.NewRouter()
 	router.Use(middlewares.Logger)
 	router.Use(middlewares.CheckUser)
+	ab := auth.GetAuthBoss()
+	router.Use(ab.LoadClientStateMiddleware, remember.Middleware(ab))
 
 	router.Path("/ping").Methods(http.MethodGet).Handler(infra.CustomMux(controller.Ping))
+	a := router.PathPrefix("/").Subrouter()
+	a.Use(authboss.ModuleListMiddleware(ab))
+	a.PathPrefix("/auth").Handler(http.StripPrefix("/auth", ab.Config.Core.Router))
+
+	site := router.PathPrefix("/api").Subrouter()
+	site.Use(authboss.Middleware2(ab, authboss.RequireNone, authboss.RespondUnauthorized))
+	site.PathPrefix("/").Handler(controller.GRPCController(ctx, wg))
+
+	w := router.PathPrefix("/").Subrouter()
+	w.PathPrefix("/").Handler(controller.WebsiteRouter(ctx))
+
+	address := fmt.Sprintf("0.0.0.0:%d", config.Spec.Port)
+	srv := &http.Server{
+		Addr:    address,
+		Handler: router,
+	}
+
+	util.Logger(ctx).Info("Starting server on", zap.String("address", address))
+	if err := srv.ListenAndServe(); err != nil {
+		util.Logger(ctx).Fatal("Error starting server", zap.Error(err))
+	}
 	return nil
 }

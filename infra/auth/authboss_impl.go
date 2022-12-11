@@ -7,9 +7,9 @@ import (
 
 	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/util"
-	"github.com/volatiletech/authboss"
-	"github.com/volatiletech/authboss/defaults"
+	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
+	"github.com/volatiletech/authboss/v3/defaults"
 	_ "github.com/volatiletech/authboss/v3/register"
 	"go.uber.org/zap"
 )

@@ -19,6 +19,7 @@ func CheckUser(next http.Handler) http.Handler {
 		if err != nil {
 			util.Logger(r.Context()).Error("Error getting current user", zap.Error(err))
 			next.ServeHTTP(w, r)
+			return
 		}
 
 		if user != nil {
@@ -31,6 +32,8 @@ func CheckUser(next http.Handler) http.Handler {
 				ctx = users.SetUserInContext(ctx, u)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			}
+		} else {
+			next.ServeHTTP(w, r)
 		}
 	})
 }

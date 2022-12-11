@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"io"
+	"log"
 	"os"
 
 	"github.com/hjoshi123/WaaS/config"
@@ -18,32 +19,15 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/credentials"
 )
 
 var Tracer trace.Tracer
-
-type OtelErrorHandler struct {
-	logger   *zap.Logger
-	printLog bool
-}
-
-func (handler *OtelErrorHandler) Handle(err error) {
-	if handler.printLog {
-		handler.logger.Error("error in otel", zap.Error(err))
-	}
-}
 
 func init() {
 	Tracer = otel.GetTracerProvider().Tracer("")
 }
 
 func InitOTEL(ctx context.Context, insecure string, serviceName string, otelEnabled bool, file *os.File) (context.Context, func(context.Context) error, error) {
-	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-	if len(insecure) > 0 {
-		secureOption = otlptracegrpc.WithInsecure()
-	}
-
 	resources, err := resource.New(
 		ctx,
 		resource.WithAttributes(
@@ -83,13 +67,10 @@ func InitOTEL(ctx context.Context, insecure string, serviceName string, otelEnab
 		otel.SetTracerProvider(tp)
 		// ot.SetGlobalTracer(bridgeTracer)
 
-		if otelEnabled {
-			otel.SetErrorHandler(&OtelErrorHandler{printLog: true, logger: Logger(ctx).ZapLogger()})
-		} else {
-			otel.SetErrorHandler(&OtelErrorHandler{printLog: false, logger: Logger(ctx).ZapLogger()})
-		}
 		return ctx, exporter.Shutdown, nil
 	} else {
+		log.Println("OTEL ENDPOINT: ", config.Spec.OTLPEndpoint)
+		secureOption := otlptracegrpc.WithInsecure()
 		exporter, err := otlptrace.New(
 			ctx,
 			otlptracegrpc.NewClient(
@@ -114,13 +95,6 @@ func InitOTEL(ctx context.Context, insecure string, serviceName string, otelEnab
 		// newCtx, bridgeTracer, wrapperTracer := opentracingbridge.NewTracerPairWithContext(ctx, Tracer)
 
 		otel.SetTracerProvider(tp)
-		// ot.SetGlobalTracer(bridgeTracer)
-
-		if otelEnabled {
-			otel.SetErrorHandler(&OtelErrorHandler{printLog: true, logger: Logger(ctx).ZapLogger()})
-		} else {
-			otel.SetErrorHandler(&OtelErrorHandler{printLog: false, logger: Logger(ctx).ZapLogger()})
-		}
 		return ctx, exporter.Shutdown, nil
 	}
 

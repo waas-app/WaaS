@@ -42,6 +42,7 @@ func Connect(logger *zap.Logger) (*gorm.DB, error) {
 		fallthrough
 	case "postgres":
 		connectionString = pgconn(u)
+		logger.Info("connecting to postgres", zap.String("connectionString", connectionString))
 		db, err = gorm.Open(postgres.Open(connectionString), &gorm.Config{
 			Logger: lg,
 		})
@@ -66,6 +67,7 @@ func Connect(logger *zap.Logger) (*gorm.DB, error) {
 	}
 
 	instance = db
+	AutoMigrate(db)
 	return db, nil
 }
 
@@ -76,11 +78,12 @@ func pgconn(u *url.URL) string {
 		util.Logger(context.Background()).Error("Failed to decode query", zap.Error(err))
 		decodedQuery = ""
 	}
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s %s",
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=%s dbname=%s %s",
 		u.Hostname(),
 		u.Port(),
 		u.User.Username(),
 		password,
+		"disable",
 		strings.TrimLeft(u.Path, "/"),
 		decodedQuery,
 	)

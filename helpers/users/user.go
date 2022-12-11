@@ -5,7 +5,7 @@ import (
 
 	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/model"
-	"github.com/volatiletech/authboss"
+	"github.com/volatiletech/authboss/v3"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

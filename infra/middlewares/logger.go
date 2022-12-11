@@ -6,6 +6,7 @@ import (
 
 	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/util"
+	"github.com/urfave/negroni"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
@@ -43,12 +44,13 @@ func Logger(next http.Handler) http.Handler {
 			zap.String("referer", r.Referer()),
 		)
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+		nw := negroni.NewResponseWriter(w)
+		next.ServeHTTP(nw, r.WithContext(ctx))
 
 		end := time.Now()
 		latency := end.Sub(start)
 		key := "latency"
-		status := r.Response.StatusCode
+		status := nw.Status()
 		util.Logger(ctx).Info("Request End",
 			zap.Int("status", status),
 			zap.String("path", path),

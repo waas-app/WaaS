@@ -18,14 +18,14 @@ import (
 )
 
 type DeviceHelpers struct {
-	wg          wgembed.WireGuardInterface
+	Wg          wgembed.WireGuardInterface
 	deviceStore datastore.DeviceStore
 	nextIPLock  sync.Mutex
 }
 
 func NewDeviceHelpers(wg wgembed.WireGuardInterface) *DeviceHelpers {
 	return &DeviceHelpers{
-		wg:          wg,
+		Wg:          wg,
 		deviceStore: datastore.NewDeviceStore(),
 		nextIPLock:  sync.Mutex{},
 	}
@@ -37,10 +37,12 @@ func (dh *DeviceHelpers) RunSync(ctx context.Context) error {
 		return err
 	}
 
+	go syncMetadata(ctx, dh)
+
 	return nil
 }
 
-func (dh *DeviceHelpers) AddDevice(ctx context.Context, user model.User, name string, publicKey string) (*model.Device, error) {
+func (dh *DeviceHelpers) AddDevice(ctx context.Context, user *model.User, name string, publicKey string) (*model.Device, error) {
 	if name == "" {
 		return nil, errors.New("device name must not be empty")
 	}
@@ -51,6 +53,7 @@ func (dh *DeviceHelpers) AddDevice(ctx context.Context, user model.User, name st
 	}
 
 	device := &model.Device{
+		Owner:      user.Slug,
 		OwnerName:  user.Username,
 		OwnerEmail: user.Email,
 		Name:       name,
@@ -90,8 +93,6 @@ func (dh *DeviceHelpers) nextClientAddress(ctx context.Context) (string, error) 
 	vpnip, vpnsubnet := ip.ParseCIDR(config.Spec.VPN.CIDR)
 	ipaddr := vpnip.Mask(vpnsubnet.Mask)
 
-	// TODO: read up on better ways to allocate client's IP
-	// addresses from a configurable CIDR
 	usedIPs := []net.IP{
 		ipaddr,            // x.x.x.0
 		ip.NextIP(ipaddr), // x.x.x.1
@@ -143,7 +144,7 @@ func (dh *DeviceHelpers) sync(ctx context.Context) error {
 		return errors.Wrap(err, "failed to list devices")
 	}
 
-	peers, err := dh.wg.ListPeers()
+	peers, err := dh.Wg.ListPeers()
 	if err != nil {
 		return errors.Wrap(err, "failed to list peers")
 	}
@@ -151,7 +152,7 @@ func (dh *DeviceHelpers) sync(ctx context.Context) error {
 	// Remove any peers for devices that are no longer in storage
 	for _, peer := range peers {
 		if !deviceListContains(devices, peer.PublicKey.String()) {
-			if err := dh.wg.RemovePeer(peer.PublicKey.String()); err != nil {
+			if err := dh.Wg.RemovePeer(peer.PublicKey.String()); err != nil {
 				util.Logger(ctx).Warn("failed to remove peer during sync:", zap.String("public key:", peer.PublicKey.String()))
 			}
 		}
@@ -159,7 +160,7 @@ func (dh *DeviceHelpers) sync(ctx context.Context) error {
 
 	// Add peers for all devices in storage
 	for _, device := range devices {
-		if err := dh.wg.AddPeer(device.PublicKey, device.Address); err != nil {
+		if err := dh.Wg.AddPeer(device.PublicKey, device.Address); err != nil {
 			util.Logger(ctx).Warn("failed to remove peer during sync:", zap.String("device name:", device.Name))
 		}
 	}

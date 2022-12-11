@@ -21,7 +21,7 @@ type Output struct {
 	Output interface{}
 }
 
-type CustomMux func(ctx context.Context, input Input) (Output, error)
+type CustomMux func(ctx context.Context, input Input) (output Output, err error)
 
 func (m CustomMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -35,16 +35,13 @@ func (m CustomMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	output, err := m(ctx, input) //Calling Handler
 	if err != nil {
 		util.Logger(ctx).Error("Error in handler", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
 	if output.Output != nil {
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(output.Output)
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (m CustomMux) WithMiddlewares(wrappers ...func(http.Handler) http.Handler) http.Handler {

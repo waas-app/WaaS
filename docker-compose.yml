@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  postgresql:
+    container_name: postgres
+    image: postgres:14
+    restart: on-failure
+    network_mode: bridge
+    environment:
+      - POSTGRES_USER=waas 
+      - POSTGRES_PASSWORD=WaasPassw0rd
+      - POSTGRES_DB=waas
+      - DATABASE_HOST=0.0.0.0
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+  
+  waas:
+    # to build the docker image from the source
+    build:
+      dockerfile: Dockerfile
+      context: .
+    # image: waas:latest
+    container_name: waas
+    network_mode: bridge
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - "waas-data:/data"
+    #   - "./config.yaml:/config.yaml" # if you have a custom config file
+    ports:
+      - "8000:8000/tcp"
+      - "51820:51820/udp"
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    depends_on:
+      - postgresql
+
+volumes:
+  data:
+    driver: local
+  waas-data:
+    driver: local

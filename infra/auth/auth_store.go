@@ -2,12 +2,14 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"strings"
 
+	"github.com/hjoshi123/WaaS/config"
 	"github.com/hjoshi123/WaaS/datastore"
 	"github.com/hjoshi123/WaaS/infra/database"
 	"github.com/hjoshi123/WaaS/model"
-	"github.com/volatiletech/authboss"
+	"github.com/volatiletech/authboss/v3"
 )
 
 type AuthStore struct {
@@ -20,8 +22,6 @@ func (a AuthStore) Load(ctx context.Context, key string) (authboss.User, error) 
 	var user model.User
 
 	key = strings.TrimSpace(key)
-
-	db = db.Where("active = true or active is null")
 
 	//need to check key to see if email or phone
 	if strings.Contains(key, "@") {
@@ -39,6 +39,32 @@ func (a AuthStore) Save(ctx context.Context, user authboss.User) error {
 	if err := db.Save(u).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (a AuthStore) Create(ctx context.Context, user authboss.User) error {
+	u, ok := ctx.Value(config.CurrentUser).(*model.User)
+	if u != nil && ok {
+		return errors.New("cannot register with user already signed in")
+	}
+	db := database.Instance(ctx)
+	u = user.(*model.User)
+
+	//check if email/phone is present
+	var check model.User
+
+	//create by email
+	if u.Email != "" {
+		if err := db.Where("lower(email) = ?", strings.ToLower(u.Email)).First(&check).Error; err == nil {
+			return authboss.ErrUserFound
+		}
+	}
+
+	if err := db.Create(u).Error; err != nil {
+		return err
+	}
+	// Post user create flows.
+	// Publish that user was create
 	return nil
 }
 
