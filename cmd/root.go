@@ -118,7 +118,7 @@ func InitConfig() {
 		viper.SetConfigName("waas")
 	}
 
-	util.Logger(ctx).Info("config file", zap.String("file", wd))
+	log.Println("Working Directory: ", wd)
 
 	files, err := os.ReadDir("./")
 	if err != nil {
