@@ -17,9 +17,6 @@ export class App extends React.Component {
   }
 
   render() {
-    if (!AppState.info) {
-      return <p>loading...</p>;
-    }
     return (
       <Router>
         <CssBaseline />
