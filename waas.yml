@@ -5,13 +5,14 @@ wg:
   enabled: true
   port: 51810
   interface: wg0
-root_url: http://10.0.0.24:3000
+root_url: http://34.28.209.97:3000
 port: 8000
-storage: postgresql://waas:WaasPassw0rd@10.0.0.24:5432/waas
+storage: postgresql://waas:WaasPassw0rd@postgresql:5432/waas
 vpn:
   cidr: 192.168.2.0/24
   gatewayInterface: ens18
 dns:
   enabled: true
-otlp_endpoint: 10.0.0.12:4317
-cookie_domain: 10.0.0.24
+otlp_endpoint: localhost:4317
+cookie_domain: 34.28.209.97
+redis_url: redis:6379
