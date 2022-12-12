@@ -3,7 +3,6 @@ FROM node:18-alpine as website
 WORKDIR /code
 COPY ./website/package.json ./
 COPY ./website/yarn.lock ./
-RUN npm i --location=global yarn
 RUN yarn
 COPY ./website/ ./
 RUN yarn build
