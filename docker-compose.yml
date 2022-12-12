@@ -18,11 +18,11 @@ services:
   
   waas:
     # to build the docker image from the source
-    build:
-      dockerfile: Dockerfile
-      context: .
-      target: waas
-    # image: waas:latest
+    # build:
+    #   dockerfile: Dockerfile
+    #   context: .
+    #   target: waas
+    image: ghcr.io/waas-app/waas-waas:latest
     container_name: waas
     network_mode: bridge
     cap_add:
@@ -51,12 +51,12 @@ services:
 
   worker:
     # to build the docker image from the source
-    build:
-      dockerfile: Dockerfile
-      context: .
-      target: worker
+    # build:
+    #   dockerfile: Dockerfile
+    #   context: .
+    #   target: worker
     # image: waas:latest
-    container_name: waas-worker
+    container_name: ghcr.io/waas-app/waas-worker:latest
     network_mode: bridge
     cap_add:
       - NET_ADMIN
