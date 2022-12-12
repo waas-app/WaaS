@@ -1,3 +1,4 @@
 waas
 *.env
 .stfolder
+.DS_Store

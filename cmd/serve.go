@@ -29,7 +29,13 @@ var (
 			return RunServe(cmd, args)
 		},
 	}
+
+	wg wgembed.WireGuardInterface
 )
+
+func GetWgInterface() wgembed.WireGuardInterface {
+	return wg
+}
 
 func RunServe(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
@@ -45,7 +51,7 @@ func RunServe(cmd *cobra.Command, args []string) error {
 	serverIP := ip.GetWireGuardServerIP(config.Spec.VPN.CIDR)
 	config.Spec.VPN.AllowedIPs = append(config.Spec.VPN.AllowedIPs, fmt.Sprintf("%s/32", serverIP.IP.String()))
 
-	wg := wgembed.NewNoOpInterface()
+	wg = wgembed.NewNoOpInterface()
 
 	// this needs to be run only if wireguard needs to be run.
 	if config.Spec.WG.Enabled {

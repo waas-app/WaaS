@@ -1,15 +1,15 @@
-import { ButtonGroup } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Paper from '@material-ui/core/Paper';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import { GetApp } from '@material-ui/icons';
-import Laptop from '@material-ui/icons/Laptop';
-import PhoneIphone from '@material-ui/icons/PhoneIphone';
+import { ButtonGroup } from '@mui/material';
+import Button from '@mui/material/Button';
+import { Grid } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import { GetApp } from '@mui/icons-material';
+import Laptop from '@mui/icons-material/Laptop';
+import PhoneIphone from '@mui/icons-material/PhoneIphone';
 import React from 'react';
 import { isMobile } from '../Platform';
 import { download } from '../Util';
@@ -58,7 +58,7 @@ export class GetConnected extends React.Component<Props> {
         </Paper>
 
         <TabPanel for="desktop" value={this.state.currentTab}>
-          <Grid container direction="row" justify="space-around" alignItems="center">
+          <Grid container direction="row" alignItems="center">
             <List>
               <ListItem>
                 <ListItemText style={{ width: 300 }} primary="1. Install the WireGuard App" />
@@ -90,7 +90,7 @@ export class GetConnected extends React.Component<Props> {
         </TabPanel>
 
         <TabPanel for="mobile" value={this.state.currentTab}>
-          <Grid container direction="row" justify="space-around" alignItems="center">
+          <Grid container direction="row" alignItems="center">
             <Grid item>
               <List>
                 <ListItem>

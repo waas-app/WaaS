@@ -8,6 +8,7 @@ WORKDIR /app
 # Copy go mod and sum files 
 COPY go.mod go.sum ./
 COPY . .
+RUN curl -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 -o wait-for-it
 
 RUN apk add protobuf
 RUN apk add protobuf-dev
@@ -26,10 +27,11 @@ ENV GARCH=amd64
 ENV CGO_ENABLED=1
 ENV GO111MODULE=on
 RUN go build -o waas main.go
+RUN go build -o worker cmd/worker/main.go
 RUN ls -aril
 
 # Start a new stage from scratch
-FROM alpine:latest
+FROM alpine:latest as waas
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
@@ -37,6 +39,7 @@ WORKDIR /root/
 # Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
 COPY --from=builder /app/waas .
 COPY --from=builder /app/waas.yml .
+COPY --from=builder /app/wait-for-it .
 RUN ls -aril
 RUN cat waas.yml
 
@@ -49,4 +52,15 @@ RUN apk add wireguard-tools
 RUN apk add curl
 
 #Command to run the executable
-CMD ["./waas", "serve"]
+# CMD ["./waas", "serve"]
+CMD wait-for-it -host=postgresql -port=5432 -timeout=60 -- ./waas serve
+
+FROM alpine:latest as worker
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
+COPY --from=builder /app/worker .
+
+CMD [ "./worker" ]

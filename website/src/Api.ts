@@ -1,12 +1,13 @@
 import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
-import { Devices } from './sdk/devices_pb';
-import { Server } from './sdk/server_pb';
+import { DevicesClient } from './sdk/DevicesServiceClientPb';
+import * as grpcWeb from 'grpc-web';
+import { ServerClient } from './sdk/ServerServiceClientPb';
 
 const backend = window.location.origin + '/api';
 
 export const grpc = {
-  server: new Server(backend),
-  devices: new Devices(backend),
+  server: new ServerClient(backend),
+  devices: new DevicesClient(backend),
 };
 
 // https://github.com/SafetyCulture/grpc-web-devtools

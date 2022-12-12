@@ -1,9 +1,28 @@
 package config
 
+type CTXKey string
+
+func (k CTXKey) String() string {
+	return string(k)
+}
+
+type BgMethod string
+
+func (m BgMethod) String() string {
+	return string(m)
+}
+
 const (
-	Development string = "development"
-	ServiceName string = "WaaS"
-	CurrentUser string = "currentUser"
+	Development     string   = "development"
+	ServiceName     string   = "WaaS"
+	Worker          string   = "WaasWorker"
+	CurrentUser     string   = "currentUser"
+	CtxPubSubMethod CTXKey   = "pubSubHandler"
+	OutcomeSuccess           = "success"
+	OutcomeFailure           = "failure"
+	DevicesCreate            = "devices.create"
+	DevicesDelete            = "devices.delete"
+	CtxBgMethod     BgMethod = "bgHandler"
 )
 
 type Config struct {
@@ -17,6 +36,7 @@ type Config struct {
 	Port          int    `mapstructure:"port"`
 	SessionSecret string `mapstructure:"session_secret"`
 	CookieDomain  string `mapstructure:"cookie_domain"`
+	Redis         string `mapstructure:"redis"`
 	WG            struct {
 		// Set this to false to disable the embedded wireguard
 		// server. This is useful for development environments

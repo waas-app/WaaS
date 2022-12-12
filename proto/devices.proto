@@ -27,7 +27,6 @@ message Device {
   string endpoint = 10;
   string owner_name = 11;
   string owner_email = 12;
-  string owner_provider = 13;
 }
 
 message AddDeviceReq {

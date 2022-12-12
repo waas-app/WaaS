@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgresql:
-    container_name: postgres
+    container_name: postgresql
     image: postgres:14
     restart: on-failure
     network_mode: bridge
@@ -21,6 +21,7 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+      target: waas
     # image: waas:latest
     container_name: waas
     network_mode: bridge
@@ -36,6 +37,38 @@ services:
       - "/dev/net/tun:/dev/net/tun"
     depends_on:
       - postgresql
+      - redis
+  
+  redis:
+    image: redis:6.2.5
+    container_name: redis
+    restart: on-failure
+    network_mode: bridge
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - 6379:6379
+
+  worker:
+    # to build the docker image from the source
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: worker
+    # image: waas:latest
+    container_name: waas-worker
+    network_mode: bridge
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - "waas-data:/data"
+    #   - "./config.yaml:/config.yaml" # if you have a custom config file
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    depends_on:
+      - waas
+      - postgresql
+      - redis
 
 volumes:
   data:

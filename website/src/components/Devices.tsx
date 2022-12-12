@@ -1,5 +1,5 @@
 import React from 'react';
-import Grid from '@material-ui/core/Grid';
+import Grid from '@mui/material/Grid';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { grpc } from '../Api';
@@ -11,7 +11,7 @@ import { AddDevice } from './AddDevice';
 export class Devices extends React.Component {
   @observable
   devices = autorefresh(30, async () => {
-    return (await grpc.devices.listDevices({})).items;
+    return (await grpc.devices.listSpecificDeviceForUser(new (await import('../sdk/devices_pb.d')).ListDevicesReq(), null)).getItemsList();
   });
 
   componentWillUnmount() {
@@ -23,7 +23,7 @@ export class Devices extends React.Component {
       return <p>loading...</p>;
     }
     return (
-      <Grid container spacing={3} justify="center">
+      <Grid container spacing={3}>
         <Grid item xs={12}>
           <Grid container spacing={3}>
             {this.devices.current.map((device, i) => (

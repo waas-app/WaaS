@@ -2,6 +2,7 @@
 // https://stackoverflow.com/questions/5968196/check-cookie-if-cookie-exists
 export function getCookie(name: string): string | undefined {
   const dc = document.cookie;
+  console.log(dc);
   const prefix = name + '=';
   let begin = dc.indexOf('; ' + prefix);
   let end = undefined;

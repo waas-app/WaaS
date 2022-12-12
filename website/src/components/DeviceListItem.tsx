@@ -1,22 +1,20 @@
 import React from 'react';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
-import Avatar from '@material-ui/core/Avatar';
-import WifiIcon from '@material-ui/icons/Wifi';
-import WifiOffIcon from '@material-ui/icons/WifiOff';
-import MenuItem from '@material-ui/core/MenuItem';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Avatar from '@mui/material/Avatar';
+import WifiIcon from '@mui/icons-material/Wifi';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
+import MenuItem from '@mui/material/MenuItem';
 import numeral from 'numeral';
 import { lastSeen } from '../Util';
-import { AppState } from '../AppState';
 import { IconMenu } from './IconMenu';
 import { PopoverDisplay } from './PopoverDisplay';
-import { Device } from '../sdk/devices_pb';
 import { grpc } from '../Api';
 import { observer } from 'mobx-react';
 
 interface Props {
-  device: Device.AsObject;
+  device: import('../sdk/devices_pb.d').Device;
   onRemove: () => void;
 }
 
@@ -24,9 +22,9 @@ interface Props {
 export class DeviceListItem extends React.Component<Props> {
   removeDevice = async () => {
     try {
-      await grpc.devices.deleteDevice({
-        name: this.props.device.name,
-      });
+      const del = new (await import('../sdk/devices_pb.d')).DeleteDeviceReq()
+      del.setName(this.props.device.getName())
+      await grpc.devices.deleteDevice(del, null);
       this.props.onRemove();
     } catch {
       window.alert('api request failed');
@@ -38,11 +36,11 @@ export class DeviceListItem extends React.Component<Props> {
     return (
       <Card>
         <CardHeader
-          title={device.name}
+          title={device.getName()}
           avatar={
-            <Avatar style={{ backgroundColor: device.connected ? '#76de8a' : '#bdbdbd' }}>
+            <Avatar style={{ backgroundColor: device.getConnected() ? '#76de8a' : '#bdbdbd' }}>
               {/* <DonutSmallIcon /> */}
-              {device.connected ? <WifiIcon /> : <WifiOffIcon />}
+              {device.getConnected() ? <WifiIcon /> : <WifiOffIcon />}
             </Avatar>
           }
           action={
@@ -56,35 +54,35 @@ export class DeviceListItem extends React.Component<Props> {
         <CardContent>
           <table cellPadding="5">
             <tbody>
-              {AppState.info?.metadataEnabled && device.connected && (
+              {device.getConnected() && (
                 <>
                   <tr>
                     <td>Endpoint</td>
-                    <td>{device.endpoint}</td>
+                    <td>{device.getEndpoint()}</td>
                   </tr>
                   <tr>
                     <td>Download</td>
-                    <td>{numeral(device.transmitBytes).format('0b')}</td>
+                    <td>{numeral(device.getTransmitBytes()).format('0b')}</td>
                   </tr>
                   <tr>
                     <td>Upload</td>
-                    <td>{numeral(device.receiveBytes).format('0b')}</td>
+                    <td>{numeral(device.getReceiveBytes()).format('0b')}</td>
                   </tr>
                 </>
               )}
-              {AppState.info?.metadataEnabled && !device.connected && (
+              {!device.getConnected() && (
                 <tr>
                   <td>Disconnected</td>
                 </tr>
               )}
               <tr>
                 <td>Last Seen</td>
-                <td>{lastSeen(device.lastHandshakeTime)}</td>
+                <td>{lastSeen(device.getLastHandshakeTime().toObject())}</td>
               </tr>
               <tr>
                 <td>Public key</td>
                 <td>
-                  <PopoverDisplay label="show">{device.publicKey}</PopoverDisplay>
+                  <PopoverDisplay label="show">{device.getPublicKey()}</PopoverDisplay>
                 </td>
               </tr>
             </tbody>

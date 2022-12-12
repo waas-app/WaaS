@@ -3,6 +3,7 @@ import React from 'react';
 interface Props {
   for: any;
   value: any;
+  children: any;
 }
 
 export class TabPanel extends React.Component<Props> {

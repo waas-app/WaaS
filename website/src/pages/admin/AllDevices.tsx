@@ -1,32 +1,32 @@
 import React from 'react';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { observer } from 'mobx-react';
 import { grpc } from '../../Api';
 import { lastSeen, lazy } from '../../Util';
-import { Device } from '../../sdk/devices_pb';
 import { confirm } from '../../components/Present';
 import { AppState } from '../../AppState';
+import { StringValue } from 'google-protobuf/google/protobuf/wrappers_pb';
 
 @observer
 export class AllDevices extends React.Component {
   devices = lazy(async () => {
-    const res = await grpc.devices.listAllDevices({});
-    return res.items;
+    const res = await grpc.devices.listAllDevices(new (await import('../../sdk/devices_pb.d')).ListAllDevicesReq(), null);
+    return res.getItemsList();
   });
 
-  deleteDevice = async (device: Device.AsObject) => {
+  deleteDevice = async (device: import('../../sdk/devices_pb.d').Device.AsObject) => {
     if (await confirm('Are you sure?')) {
-      await grpc.devices.deleteDevice({
-        name: device.name,
-        owner: { value: device.owner },
-      });
+      const del = new (await import('../../sdk/devices_pb.d')).DeleteDeviceReq()
+      del.setName(device.name)
+      del.setOwner(new StringValue().setValue(device.owner))
+      await grpc.devices.deleteDevice(del, null);
       await this.devices.refresh();
     }
   };
@@ -41,8 +41,6 @@ export class AllDevices extends React.Component {
     // show the provider column
     // when there is more than 1 provider in use
     // i.e. not all devices are from the same auth provider.
-    const showProviderCol = rows.length >= 2 && rows.some((r) => r.ownerProvider !== rows[0].ownerProvider);
-
     return (
       <div style={{ display: 'grid', gridGap: 25, gridAutoFlow: 'row'}}>
         <Typography variant="h5" component="h5">
@@ -53,7 +51,6 @@ export class AllDevices extends React.Component {
             <TableHead>
               <TableRow>
                 <TableCell>Owner</TableCell>
-                {showProviderCol && <TableCell>Auth Provider</TableCell>}
                 <TableCell>Device</TableCell>
                 <TableCell>Connected</TableCell>
                 <TableCell>Last Seen</TableCell>
@@ -64,14 +61,13 @@ export class AllDevices extends React.Component {
               {rows.map((row, i) => (
                 <TableRow key={i}>
                   <TableCell component="th" scope="row">
-                    {row.ownerName || row.ownerEmail || row.owner}
+                    {row.getOwnerName() || row.getOwnerEmail() || row.getOwner()}
                   </TableCell>
-                  {showProviderCol && <TableCell>{row.ownerProvider}</TableCell>}
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.connected ? 'yes' : 'no'}</TableCell>
-                  <TableCell>{lastSeen(row.lastHandshakeTime)}</TableCell>
+                  <TableCell>{row.getName()}</TableCell>
+                  <TableCell>{row.getConnected() ? 'yes' : 'no'}</TableCell>
+                  <TableCell>{lastSeen(row.getLastHandshakeTime().toObject())}</TableCell>
                   <TableCell>
-                    <Button variant="outlined" color="secondary" onClick={() => this.deleteDevice(row)}>
+                    <Button variant="outlined" color="secondary" onClick={() => this.deleteDevice(row.toObject())}>
                       Delete
                     </Button>
                   </TableCell>

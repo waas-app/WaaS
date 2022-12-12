@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
@@ -22,6 +23,12 @@ import (
 )
 
 var Tracer trace.Tracer
+
+var (
+	PubSubAttribute          = attribute.Key("pubsub")
+	TopicAttribute           = attribute.Key("topic")
+	TransactionTypeAttribute = attribute.Key("transactionType")
+)
 
 func init() {
 	Tracer = otel.GetTracerProvider().Tracer("")
@@ -95,9 +102,22 @@ func InitOTEL(ctx context.Context, insecure string, serviceName string, otelEnab
 		// newCtx, bridgeTracer, wrapperTracer := opentracingbridge.NewTracerPairWithContext(ctx, Tracer)
 
 		otel.SetTracerProvider(tp)
+		otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}, propagation.TraceContext{}))
 		return ctx, exporter.Shutdown, nil
 	}
+}
 
+func MapCarriersWithSpan(ctx context.Context, mapCarrier propagation.MapCarrier) propagation.MapCarrier {
+	if mapCarrier == nil {
+		mapCarrier = make(propagation.MapCarrier)
+	}
+
+	otel.GetTextMapPropagator().Inject(ctx, mapCarrier)
+	return mapCarrier
+}
+
+func ExtractMapCarrierToSpan(ctx context.Context, mapCarrier propagation.MapCarrier) context.Context {
+	return otel.GetTextMapPropagator().Extract(ctx, mapCarrier)
 }
 
 func newExporter(w io.Writer) (sdktrace.SpanExporter, error) {

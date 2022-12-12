@@ -1,10 +1,19 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
 	"time"
 
+	"github.com/waas-app/WaaS/config"
+	"github.com/waas-app/WaaS/infra/red"
 	"gorm.io/gorm"
 )
+
+type DevicePayload struct {
+	Type   string  `json:"type"`
+	Device *Device `json:"device"`
+}
 
 type Device struct {
 	Owner             string     `json:"owner" gorm:"type:varchar(100);unique_index:key;primary_key"`
@@ -25,10 +34,58 @@ func (d *Device) TableName() string {
 	return "devices"
 }
 
-func (d *Device) AfterSave(tx *gorm.DB) error {
-	return nil
+func (d *Device) AfterCreate(tx *gorm.DB) error {
+	ctx := tx.Statement.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	payload := new(DevicePayload)
+	payload.Type = config.DevicesCreate
+
+	p, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	msg := red.Message{
+		Topic:   payload.Type,
+		Payload: string(p),
+	}
+
+	pubsubHandler, err := red.GetPubsubClientHandler()
+	if err != nil {
+		return err
+	}
+
+	err = pubsubHandler.Publish(ctx, msg)
+	return err
 }
 
-func (d *Device) AfterDelete(tx *gorm.DB) error {
-	return nil
+func (d *Device) BeforeDelete(tx *gorm.DB) error {
+	ctx := tx.Statement.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	payload := new(DevicePayload)
+	payload.Type = config.DevicesDelete
+
+	p, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	msg := red.Message{
+		Topic:   payload.Type,
+		Payload: string(p),
+	}
+
+	pubsubHandler, err := red.GetPubsubClientHandler()
+	if err != nil {
+		return err
+	}
+
+	err = pubsubHandler.Publish(ctx, msg)
+	return err
 }

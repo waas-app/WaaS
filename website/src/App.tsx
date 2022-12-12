@@ -1,18 +1,19 @@
 import React from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Box from '@material-ui/core/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
 import Navigation from './components/Navigation';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { grpc } from './Api';
 import { AppState } from './AppState';
 import { YourDevices } from './pages/YourDevices';
 import { AllDevices } from './pages/admin/AllDevices';
+import Login  from './pages/auth/Login';
 
 @observer
 export class App extends React.Component {
   async componentDidMount() {
-    AppState.info = await grpc.server.info({});
+    AppState.info = await (await grpc.server.info(new (await import('./sdk/server_pb.d')).InfoReq(), null)).toObject();
   }
 
   render() {
@@ -24,14 +25,15 @@ export class App extends React.Component {
         <CssBaseline />
         <Navigation />
         <Box component="div" m={2}>
-          <Switch>
-            <Route exact path="/" component={YourDevices} />
+          <Routes>
+            <Route path="/" element={<YourDevices />} />
             {AppState.info.isAdmin && (
               <>
-                <Route exact path="/admin/all-devices" component={AllDevices} />
+                <Route path="/admin/all-devices" element={<AllDevices />} />
               </>
             )}
-          </Switch>
+            <Route path="/auth/login" element={<Login />} />
+          </Routes>
         </Box>
       </Router>
     );

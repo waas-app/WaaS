@@ -46,6 +46,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Spec.RootURL, "ROOT_URL", "http://localhost:3000", "root url to run wireguard on")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.SessionSecret, "SESSION_SECRET", "3bcf9f7cbc479b854f6877e917f82df03110db179d121f0c00bfd3afaa28f52eaff20af628b1e67caf9b7b39648e1c892df11036f9d2f2f767ede807d4c2779", "session secret")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.CookieDomain, "COOKIE_DOMAIN", "localhost", "cookie domain")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.Redis, "COOKIE_NAME", "redis:6379", "redis url")
 
 	viper.BindPFlag("environment", rootCmd.PersistentFlags().Lookup("environment"))
 	viper.BindPFlag("admin_username", rootCmd.PersistentFlags().Lookup("WG_ADMIN_USERNAME"))

@@ -1,17 +1,17 @@
-import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardHeader from '@material-ui/core/CardHeader';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import Typography from '@material-ui/core/Typography';
-import AddIcon from '@material-ui/icons/Add';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import Typography from '@mui/material/Typography';
+import AddIcon from '@mui/icons-material/Add';
 import { codeBlock } from 'common-tags';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -48,17 +48,17 @@ export class AddDevice extends React.Component<Props> {
     const privateKey = window.btoa(String.fromCharCode(...(new Uint8Array(keypair.secretKey) as any)));
 
     try {
-      const device = await grpc.devices.addDevice({
-        name: this.deviceName,
-        publicKey,
-      });
+      const addReq = new (await import('../sdk/devices_pb.d')).AddDeviceReq();
+      addReq.setName(this.deviceName);
+      addReq.setPublicKey(publicKey);
+      const device = await grpc.devices.addDevice(addReq, null);
       this.props.onAdd();
 
       const info = AppState.info!;
       const configFile = codeBlock`
         [Interface]
         PrivateKey = ${privateKey}
-        Address = ${device.address}
+        Address = ${device.getAddress()}
         ${info.dnsEnabled && `DNS = ${info.dnsAddress}`}
 
         [Peer]
@@ -109,7 +109,7 @@ export class AddDevice extends React.Component<Props> {
             </form>
           </CardContent>
         </Card>
-        <Dialog disableBackdropClick disableEscapeKeyDown maxWidth="xl" open={this.dialogOpen}>
+        <Dialog disableEscapeKeyDown maxWidth="xl" open={this.dialogOpen}>
           <DialogTitle>
             Get Connected
             <Info>
