@@ -28,12 +28,6 @@ func InitLogger() {
 	// loggerConfig.Level.SetLevel(zapcore.DebugLevel)
 
 	var err error
-
-	// tracer, _ := apm.NewTracerOptions(apm.TracerOptions{
-	// 	ServiceName:        config.Spec.ServiceName,
-	// 	ServiceEnvironment: config.Spec.Environment,
-	// })
-
 	logger, err = loggerConfig.Build(zap.Fields(
 		zap.Int("pid", os.Getpid()),
 		zap.String("env", config.Spec.Environment),
@@ -52,7 +46,7 @@ func Logger(ctx context.Context) *otelzap.LoggerWithCtx {
 		ctx = context.Background()
 	}
 
-	l := otelzap.New(newLogger, otelzap.WithMinLevel(logLevel), otelzap.WithStackTrace(true)).Ctx(ctx)
+	l := otelzap.New(newLogger, otelzap.WithTraceIDField(true), otelzap.WithMinLevel(logLevel), otelzap.WithStackTrace(true)).Ctx(ctx)
 	return &l
 }
 

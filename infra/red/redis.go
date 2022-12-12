@@ -2,6 +2,7 @@ package red
 
 import (
 	"context"
+	"log"
 
 	"github.com/go-redis/redis/extra/redisotel/v9"
 	"github.com/go-redis/redis/v9"
@@ -27,7 +28,8 @@ func getNewClient() (*redis.Client, error) {
 		util.Logger(ctx).Error("Failed to connect to Redis server", zap.Error(err))
 		return nil, err
 	}
-	util.Logger(ctx).Info("Redis Set up successfully")
+	log.Println("Connected to Redis server")
+	log.Println(ctx)
 
 	if err := redisotel.InstrumentTracing(client); err != nil {
 		util.Logger(ctx).Error("Failed to install tracing hook", zap.Error(err))

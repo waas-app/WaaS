@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -20,7 +19,7 @@ import (
 func WebsiteRouter(ctx context.Context) *mux.Router {
 	router := mux.NewRouter()
 
-	staticFiles, err := filepath.Abs("next/dist")
+	staticFiles, err := filepath.Abs("website/build")
 	if err != nil {
 		util.Logger(ctx).Fatal("failed to get absolute path to static files", zap.Error(err))
 	}
@@ -30,7 +29,7 @@ func WebsiteRouter(ctx context.Context) *mux.Router {
 		// then proxy to a local webpack development server
 		// i.e. we're developing wg-access-server locally
 		util.Logger(ctx).Info("serving website from webpack dev server")
-		u, _ := url.Parse(fmt.Sprintf("%s/auth/login", config.Spec.RootURL))
+		u, _ := url.Parse(config.Spec.RootURL)
 		router.NotFoundHandler = httputil.NewSingleHostReverseProxy(u)
 	} else {
 		// if the static files directory exists then
