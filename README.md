@@ -14,3 +14,4 @@ WaaS is written in Golang and we have docker compose files available for install
 * NextJS
 * Postgres
 * Wireguard
+* Redis
