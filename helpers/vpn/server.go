@@ -16,7 +16,6 @@ import (
 
 type VPNServer struct {
 	Wg wgembed.WireGuardInterface
-	proto.UnsafeServerServer
 }
 
 func (v *VPNServer) Info(ctx context.Context, req *proto.InfoReq) (*proto.InfoRes, error) {

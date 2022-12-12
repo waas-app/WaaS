@@ -18,7 +18,6 @@ import (
 // DeviceSvc is a gRPC service that handles device related requests.
 type DeviceSvc struct {
 	DeviceHelpers *DeviceHelpers
-	proto.UnsafeDevicesServer
 }
 
 func (d *DeviceSvc) AddDevice(ctx context.Context, req *proto.AddDeviceReq) (*proto.Device, error) {

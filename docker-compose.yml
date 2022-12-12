@@ -48,7 +48,7 @@ services:
   
   redis:
     image: redis:6.2.5
-    container_name: redis
+    container_name: red
     restart: on-failure
     volumes:
       - ./data/redis:/data
@@ -57,7 +57,7 @@ services:
     networks:
       bridgenet:
         aliases:
-          - redis
+          - red
 
   worker:
     # to build the docker image from the source

@@ -15,4 +15,4 @@ dns:
   enabled: true
 otlp_endpoint: 34.28.209.97:4317
 cookie_domain: 34.28.209.97
-redis_url: redis://redis:6379
+redis_url: redis://red:6379

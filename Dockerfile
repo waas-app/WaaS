@@ -23,15 +23,18 @@ RUN curl -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/wa
 
 RUN apk add protobuf
 RUN apk add protobuf-dev
-RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+# RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+# RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+RUN go install github.com/golang/protobuf/protoc-gen-go
 RUN export PATH="$PATH:$(go env GOPATH)/bin"
 # Download all dependencies. Dependencies will be cached if the go.mod and the go.sum files are not changed 
 RUN go mod download 
 
 # Copy the source from the current directory to the working Directory inside the container
-RUN protoc --go_out=proto --go_opt=paths=source_relative --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/devices.proto
-RUN protoc --go_out=proto --go_opt=paths=source_relative --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/server.proto
+RUN mkdir -p proto/proto
+RUN protoc -I proto/ proto/*.proto --go_opt=paths=source_relative --go_out="plugins=grpc:./proto/proto"
+# RUN protoc --go_out=proto --go_opt=paths=source_relative --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/devices.proto
+# RUN protoc --go_out=proto --go_opt=paths=source_relative --go-grpc_out=proto --go-grpc_opt=paths=source_relative proto/server.proto
 # Build the Go app
 ENV GOOS=linux
 ENV GARCH=amd64
@@ -51,7 +54,7 @@ WORKDIR /root/
 COPY --from=builder /app/waas .
 # COPY --from=builder /app/waas.yml .
 COPY --from=builder /app/wait-for-it /usr/local/bin/
-COPY --from=website /code/build /website/build
+COPY --from=website /code/build /root/website/build
 RUN ls -aril
 # RUN cat waas.yml
 RUN chmod +x /usr/local/bin/wait-for-it
