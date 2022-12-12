@@ -56,8 +56,8 @@ services:
     #   dockerfile: Dockerfile
     #   context: .
     #   target: worker
-    # image: waas:latest
-    container_name: ghcr.io/waas-app/waas-worker:latest
+    image: ghcr.io/waas-app/waas-worker:latest
+    container_name: worker
     network_mode: bridge
     cap_add:
       - NET_ADMIN
