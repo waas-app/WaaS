@@ -15,6 +15,10 @@ import (
 
 func main() {
 	ctx := context.Background()
+	if err := initRedisHandlerClient(ctx); err != nil {
+		return
+	}
+
 	client, err := red.GetPubsubClientHandler()
 	if err != nil {
 		util.Logger(ctx).Error("error getting client", zap.Error(err))
@@ -34,10 +38,6 @@ func main() {
 		return
 	}
 	defer tCleanup(ctx)
-
-	if err := initRedisHandlerClient(ctx); err != nil {
-		return
-	}
 
 	client.Subscribe(ctx, config.DevicesCreate, createDeviceHandler)
 	client.Subscribe(ctx, config.DevicesDelete, deleteDeviceHandler)

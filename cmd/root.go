@@ -18,9 +18,30 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "waas",
 		Short: "waas is a command line tool for interacting with the Wireguard",
-		// PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// 	InitConfig(cmd.Context())
-		// },
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			file := new(os.File)
+			var err error
+			if config.Spec.OTLPEndpoint == "" {
+				file, err = os.Create("traces.txt")
+				if err != nil {
+					util.Logger(cmd.Context()).Error("failed to create file", zap.Error(err))
+					return err
+				}
+				defer file.Close()
+			}
+
+			ctx := context.Background()
+			if cmd.Context() == nil {
+				cmd.SetContext(ctx)
+			}
+			ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
+			if err != nil {
+				util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
+				return err
+			}
+			defer tCleanup(ctx)
+			return nil
+		},
 	}
 	cfgFile string
 )
@@ -99,6 +120,7 @@ func Execute() error {
 	// 	return err
 	// }
 	// defer tCleanup(ctx)
+
 	return rootCmd.ExecuteContext(ctx)
 }
 
@@ -120,15 +142,6 @@ func InitConfig() {
 
 	log.Println("Working Directory: ", wd)
 
-	files, err := os.ReadDir("./")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, f := range files {
-		fmt.Println(f.Name())
-	}
-
 	viper.AutomaticEnv() // read in environment variables that match
 
 	if err := viper.ReadInConfig(); err == nil {
@@ -142,23 +155,6 @@ func InitConfig() {
 	}
 
 	util.InitLogger()
-
-	file := new(os.File)
-	if config.Spec.OTLPEndpoint == "" {
-		file, err = os.Create("traces.txt")
-		if err != nil {
-			util.Logger(ctx).Error("failed to create file", zap.Error(err))
-			return
-		}
-		defer file.Close()
-	}
-
-	ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
-	if err != nil {
-		util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
-		return
-	}
-	defer tCleanup(ctx)
 
 	if config.Spec.WG.PrivateKey == "" {
 		key, err := wgtypes.GeneratePrivateKey()
