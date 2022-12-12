@@ -1,6 +1,5 @@
 FROM node:18-alpine as website
 
-RUN apt-get install -y protobuf-compiler libprotobuf-dev
 WORKDIR /code
 COPY ./website/package.json ./
 COPY ./website/yarn.lock ./
