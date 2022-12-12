@@ -36,7 +36,7 @@ type Config struct {
 	Port          int    `mapstructure:"port"`
 	SessionSecret string `mapstructure:"session_secret"`
 	CookieDomain  string `mapstructure:"cookie_domain"`
-	Redis         string `mapstructure:"redis"`
+	Redis         string `mapstructure:"redis_url"`
 	WG            struct {
 		// Set this to false to disable the embedded wireguard
 		// server. This is useful for development environments

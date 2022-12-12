@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -25,7 +26,9 @@ var (
 )
 
 func init() {
-	// cobra.OnInitialize(InitConfig)
+	cobra.OnInitialize(InitConfig)
+
+	viper.AutomaticEnv()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.waas.yaml)")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.OTLPEndpoint, "OTLP_ENDPOINT", "10.0.0.123:4317", "OTLP endpoint")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.Environment, "environment", "", "environment to run in")
@@ -46,8 +49,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Spec.RootURL, "ROOT_URL", "http://localhost:3000", "root url to run wireguard on")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.SessionSecret, "SESSION_SECRET", "3bcf9f7cbc479b854f6877e917f82df03110db179d121f0c00bfd3afaa28f52eaff20af628b1e67caf9b7b39648e1c892df11036f9d2f2f767ede807d4c2779", "session secret")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.CookieDomain, "COOKIE_DOMAIN", "localhost", "cookie domain")
-	rootCmd.PersistentFlags().StringVar(&config.Spec.Redis, "COOKIE_NAME", "redis:6379", "redis url")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.Redis, "REDIS_URL", "redis:6379", "redis url")
 
+	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("environment", rootCmd.PersistentFlags().Lookup("environment"))
 	viper.BindPFlag("admin_username", rootCmd.PersistentFlags().Lookup("WG_ADMIN_USERNAME"))
 	viper.BindPFlag("admin_password", rootCmd.PersistentFlags().Lookup("WG_ADMIN_PASSWORD"))
@@ -67,37 +71,40 @@ func init() {
 	viper.BindPFlag("root_url", rootCmd.PersistentFlags().Lookup("ROOT_URL"))
 	viper.BindPFlag("session_secret", rootCmd.PersistentFlags().Lookup("SESSION_SECRET"))
 	viper.BindPFlag("cookie_domain", rootCmd.PersistentFlags().Lookup("COOKIE_DOMAIN"))
+	viper.BindPFlag("redis_url", rootCmd.PersistentFlags().Lookup("REDIS_URL"))
 
 	rootCmd.AddCommand(serve)
 }
 
 func Execute() error {
 	// create new context from root command
-	file := new(os.File)
-	var err error
-	if config.Spec.OTLPEndpoint == "" {
-		file, err = os.Create("traces.txt")
-		if err != nil {
-			util.Logger(rootCmd.Context()).Error("failed to create file", zap.Error(err))
-			return err
-		}
-		defer file.Close()
-	}
+	// file := new(os.File)
+	// var err error
+	// if config.Spec.OTLPEndpoint == "" {
+	// 	file, err = os.Create("traces.txt")
+	// 	if err != nil {
+	// 		util.Logger(rootCmd.Context()).Error("failed to create file", zap.Error(err))
+	// 		return err
+	// 	}
+	// 	defer file.Close()
+	// }
 
 	ctx := context.Background()
 	if rootCmd.Context() == nil {
 		rootCmd.SetContext(ctx)
 	}
-	ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
-	if err != nil {
-		util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
-		return err
-	}
-	defer tCleanup(ctx)
+	// ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
+	// if err != nil {
+	// 	util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
+	// 	return err
+	// }
+	// defer tCleanup(ctx)
 	return rootCmd.ExecuteContext(ctx)
 }
 
 func InitConfig() {
+	log.Println(cfgFile)
+	ctx := context.Background()
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -124,10 +131,28 @@ func InitConfig() {
 
 	util.InitLogger()
 
+	file := new(os.File)
+	var err error
+	if config.Spec.OTLPEndpoint == "" {
+		file, err = os.Create("traces.txt")
+		if err != nil {
+			util.Logger(ctx).Error("failed to create file", zap.Error(err))
+			return
+		}
+		defer file.Close()
+	}
+
+	ctx, tCleanup, err := util.InitOTEL(ctx, "true", config.ServiceName, true, file)
+	if err != nil {
+		util.Logger(ctx).Error("failed to initialize opentelemetry", zap.Error(err))
+		return
+	}
+	defer tCleanup(ctx)
+
 	if config.Spec.WG.PrivateKey == "" {
 		key, err := wgtypes.GeneratePrivateKey()
 		if err != nil {
-			util.Logger(context.TODO()).Fatal("failed to generate a server private key", zap.Error(err))
+			util.Logger(ctx).Fatal("failed to generate a server private key", zap.Error(err))
 		}
 		config.Spec.WG.PrivateKey = key.String()
 	}
