@@ -31,7 +31,7 @@ func init() {
 	viper.AutomaticEnv()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.waas.yaml)")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.OTLPEndpoint, "OTLP_ENDPOINT", "10.0.0.123:4317", "OTLP endpoint")
-	rootCmd.PersistentFlags().StringVar(&config.Spec.Environment, "environment", "", "environment to run in")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.Environment, "environment", "development", "environment to run in")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminUserName, "WG_ADMIN_USERNAME", "admin", "admin username")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.AdminPassword, "WG_ADMIN_PASSWORD", "admin", "admin password")
 	rootCmd.PersistentFlags().IntVar(&config.Spec.WG.Port, "WG_PORT", 51820, "port to run wireguard on")
@@ -39,7 +39,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Spec.WG.PrivateKey, "WG_PRIVATE_KEY", "", "private key to run wireguard on")
 	rootCmd.PersistentFlags().IntVar(&config.Spec.Port, "UI_PORT", 8080, "port to run wireguard on")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.ExternalHost, "EXTERNAL_HOST", "localhost", "external host to run wireguard on")
-	rootCmd.PersistentFlags().StringVar(&config.Spec.Storage, "STORAGE", "memory", "storage to run wireguard on")
+	rootCmd.PersistentFlags().StringVar(&config.Spec.Storage, "STORAGE", "postgresql://waas:WaasPassw0rd@postgresql:5432/waas", "storage to run wireguard on")
 	rootCmd.PersistentFlags().BoolVar(&config.Spec.WG.Enabled, "WG_ENABLED", true, "enable wireguard")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.VPN.CIDR, "VPN_CIDR", "192.168.2.0/24", "cidr to run wireguard on")
 	rootCmd.PersistentFlags().StringVar(&config.Spec.VPN.GatewayInterface, "VPN_GATEWAY_INTERFACE", "eth0", "gateway interface to run wireguard on")
@@ -103,18 +103,30 @@ func Execute() error {
 }
 
 func InitConfig() {
-	log.Println(cfgFile)
+	var wd string
+	var err error
 	ctx := context.Background()
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		wd, err := os.Getwd()
+		wd, err = os.Getwd()
 		cobra.CheckErr(err)
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(wd)
 		viper.SetConfigType("yml")
 		viper.SetConfigName("waas")
+	}
+
+	util.Logger(ctx).Info("config file", zap.String("file", wd))
+
+	files, err := os.ReadDir("./")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, f := range files {
+		fmt.Println(f.Name())
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -132,7 +144,6 @@ func InitConfig() {
 	util.InitLogger()
 
 	file := new(os.File)
-	var err error
 	if config.Spec.OTLPEndpoint == "" {
 		file, err = os.Create("traces.txt")
 		if err != nil {
