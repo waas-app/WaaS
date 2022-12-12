@@ -40,10 +40,10 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
 COPY --from=builder /app/waas .
-COPY --from=builder /app/waas.yml .
+# COPY --from=builder /app/waas.yml .
 COPY --from=builder /app/wait-for-it .
 RUN ls -aril
-RUN cat waas.yml
+# RUN cat waas.yml
 
 # Expose port 8080 to the outside world
 EXPOSE 8000
