@@ -2,7 +2,7 @@ import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
 import { DevicesClient } from './sdk/DevicesServiceClientPb';
 import { ServerClient } from './sdk/ServerServiceClientPb';
 
-const backend = 'http://34.28.209.97:8000/api';
+const backend = window.location.origin + '/api';
 
 export const grpc = {
   server: new ServerClient(backend),

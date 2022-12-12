@@ -13,6 +13,7 @@ import Login  from './pages/auth/Login';
 @observer
 export class App extends React.Component {
   async componentDidMount() {
+    console.log(grpc.server)
     AppState.info = await (await grpc.server.info(new (await import('./sdk/server_pb.d')).InfoReq(), null)).toObject();
   }
 

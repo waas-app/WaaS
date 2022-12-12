@@ -1,3 +1,14 @@
+FROM node:18-alpine as website
+
+RUN apt-get install -y protobuf-compiler libprotobuf-dev
+WORKDIR /code
+COPY ./website/package.json ./
+COPY ./website/yarn.lock ./
+RUN npm i --location=global yarn
+RUN yarn
+COPY ./website/ ./
+RUN yarn build
+
 FROM golang:alpine as builder
 LABEL org.opencontainers.image.source https://github.com/waas-app/WaaS
 
@@ -42,6 +53,7 @@ WORKDIR /root/
 COPY --from=builder /app/waas .
 # COPY --from=builder /app/waas.yml .
 COPY --from=builder /app/wait-for-it /usr/local/bin/
+COPY --from=website /code/build /website/build
 RUN ls -aril
 # RUN cat waas.yml
 RUN chmod +x /usr/local/bin/wait-for-it

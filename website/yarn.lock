@@ -6819,10 +6819,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-protobuf@npm:^3.11.4, google-protobuf@npm:^3.21.2":
+"google-protobuf@npm:^3.11.4":
   version: 3.21.2
   resolution: "google-protobuf@npm:3.21.2"
   checksum: 3caa2e1e2654714cc1a201ac5e5faabcaa48f5fba3d8ff9b64ca66fe19e4e0506b94053f32eddc77bf3a7a47ac1660315c6744185c1e2bb27654fd76fe91b988
+  languageName: node
+  linkType: hard
+
+"google-protobuf@npm:^4.0.0-rc.1":
+  version: 4.0.0-rc.2
+  resolution: "google-protobuf@npm:4.0.0-rc.2"
+  checksum: 8dc8cf4b4c40d265e75910a4033be49ba2094d0bcae29318ff46eb1d4b14cb3e77eaed593b44d429dfb37fd1dc02ee8bfd93f8d41978deb78be78a7c457f9d89
   languageName: node
   linkType: hard
 
@@ -6863,7 +6870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"grpc-web@npm:^1.0.7, grpc-web@npm:^1.4.2":
+"grpc-web@npm:^1.0.7":
   version: 1.4.2
   resolution: "grpc-web@npm:1.4.2"
   checksum: 624bb14bb3a5bcd5354cce6b4873b90b574a32227abdc29f241b2dbc81363492f49dcbd257a47963bdd8e61a49b69303bd03087f42d939d48148b4764bf2a2e6
@@ -11349,9 +11356,8 @@ __metadata:
     "@types/react-router-dom": ^5.3.3
     common-tags: ^1.8.0
     date-fns: ^2.16.1
-    google-protobuf: ^3.21.2
+    google-protobuf: ^4.0.0-rc.1
     grpc-ts-web: ^0.2.0
-    grpc-web: ^1.4.2
     mobx: ^5.15.4
     mobx-react: ^6.2.2
     mobx-utils: ^5.6.1

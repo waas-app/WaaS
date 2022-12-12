@@ -46,7 +46,7 @@ func getNewPubSubClient() (*RedisPubSub, error) {
 	}
 	ctx := context.Background()
 	pubsub := client.Subscribe(ctx, "public")
-	util.Logger(ctx).Info("Subscribing", zap.String("topic", "public"))
+	util.Logger(nil).Info("Subscribing", zap.String("topic", "public"))
 
 	return &RedisPubSub{
 		client: client,
