@@ -114,9 +114,9 @@ func RunServe(cmd *cobra.Command, args []string) error {
 	a.Use(authboss.ModuleListMiddleware(ab))
 	a.PathPrefix("/auth").Handler(ab.LoadClientStateMiddleware(http.StripPrefix("/auth", ab.Config.Core.Router)))
 
-	site := router.PathPrefix("/api").Subrouter()
-	site.Use(authboss.Middleware2(ab, authboss.RequireNone, authboss.RespondUnauthorized))
-	site.PathPrefix("/").Handler(controller.GRPCController(ctx, wg))
+	site := router.PathPrefix("/").Subrouter()
+	// site.Use(authboss.Middleware2(ab, authboss.RequireNone, authboss.RespondUnauthorized))
+	site.PathPrefix("/api").Handler(controller.GRPCController(ctx, wg))
 
 	w := router.PathPrefix("/").Subrouter()
 	w.PathPrefix("/").Handler(controller.WebsiteRouter(ctx))

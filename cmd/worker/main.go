@@ -87,7 +87,7 @@ func deleteDeviceHandler(ctx context.Context, msg *red.Message) error {
 }
 
 func initRedisHandlerClient(ctx context.Context) error {
-	rps, err := red.GetPubSubClient()
+	rps, err := red.GetPubSubClient(ctx)
 	if err != nil {
 		util.Logger(ctx).Error("Error starting redis receiver", zap.Error(err))
 		return err

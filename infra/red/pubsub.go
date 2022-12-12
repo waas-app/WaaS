@@ -31,22 +31,21 @@ type RedisPubSub struct {
 
 var rPubSub *RedisPubSub
 
-func GetPubSubClient() (*RedisPubSub, error) {
+func GetPubSubClient(ctx context.Context) (*RedisPubSub, error) {
 	var err error
 	if rPubSub == nil {
-		rPubSub, err = getNewPubSubClient()
+		rPubSub, err = getNewPubSubClient(ctx)
 	}
 	return rPubSub, err
 }
 
-func getNewPubSubClient() (*RedisPubSub, error) {
-	client, err := GetClient()
+func getNewPubSubClient(ctx context.Context) (*RedisPubSub, error) {
+	client, err := GetClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ctx := context.Background()
 	pubsub := client.Subscribe(ctx, "public")
-	util.Logger(nil).Info("Subscribing", zap.String("topic", "public"))
+	util.Logger(ctx).Info("Subscribing", zap.String("topic", "public"))
 
 	return &RedisPubSub{
 		client: client,
