@@ -5,7 +5,6 @@ services:
     container_name: postgresql
     image: postgres:14
     restart: on-failure
-    network_mode: bridge
     environment:
       - POSTGRES_USER=waas 
       - POSTGRES_PASSWORD=WaasPassw0rd
@@ -15,6 +14,10 @@ services:
       - 5432:5432
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      bridgenet:
+        aliases:
+          - postgresql
   
   waas:
     # to build the docker image from the source
@@ -24,7 +27,6 @@ services:
     #   target: waas
     image: ghcr.io/waas-app/waas-waas:latest
     container_name: waas
-    network_mode: bridge
     cap_add:
       - NET_ADMIN
     volumes:
@@ -33,22 +35,29 @@ services:
     #   - "./config.yaml:/config.yaml" # if you have a custom config file
     ports:
       - "8000:8000/tcp"
-      - "51820:51820/udp"
+      - "51810:51810/udp"
     devices:
       - "/dev/net/tun:/dev/net/tun"
     depends_on:
       - postgresql
       - redis
+    networks:
+      bridgenet:
+        aliases:
+          - waas
   
   redis:
     image: redis:6.2.5
     container_name: redis
     restart: on-failure
-    network_mode: bridge
     volumes:
       - ./data/redis:/data
     ports:
       - 6379:6379
+    networks:
+      bridgenet:
+        aliases:
+          - redis
 
   worker:
     # to build the docker image from the source
@@ -58,7 +67,6 @@ services:
     #   target: worker
     image: ghcr.io/waas-app/waas-worker:latest
     container_name: worker
-    network_mode: bridge
     cap_add:
       - NET_ADMIN
     volumes:
@@ -71,9 +79,18 @@ services:
       - waas
       - postgresql
       - redis
+    networks:
+      bridgenet:
+        aliases:
+          - worker
 
 volumes:
   data:
     driver: local
   waas-data:
     driver: local
+
+networks:
+  bridgenet:
+    name: "bridge-network"
+    driver: "bridge"
