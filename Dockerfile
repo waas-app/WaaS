@@ -8,6 +8,7 @@ WORKDIR /app
 # Copy go mod and sum files 
 COPY go.mod go.sum ./
 COPY . .
+RUN apk add curl
 RUN curl -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 -o wait-for-it
 
 RUN apk add protobuf
