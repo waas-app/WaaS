@@ -41,9 +41,10 @@ WORKDIR /root/
 # Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
 COPY --from=builder /app/waas .
 # COPY --from=builder /app/waas.yml .
-COPY --from=builder /app/wait-for-it .
+COPY --from=builder /app/wait-for-it /usr/local/bin/
 RUN ls -aril
 # RUN cat waas.yml
+RUN chmod +x /usr/local/bin/wait-for-it
 
 # Expose port 8080 to the outside world
 EXPOSE 8000
@@ -64,5 +65,10 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage. Observe we also copied the .env file
 COPY --from=builder /app/worker .
+COPY --from=builder /app/wait-for-it /usr/local/bin/
+RUN ls -aril
+# RUN cat waas.yml
+RUN chmod +x /usr/local/bin/wait-for-it
 
-CMD [ "./worker" ]
+# CMD [ "./worker" ]
+CMD wait-for-it -host=redis -port=6379 -timeout=60 -- ./worker
