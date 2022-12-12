@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/waas-app/WaaS/config"
 	"github.com/waas-app/WaaS/util"
 	"go.uber.org/zap"
 )
@@ -28,7 +30,7 @@ func WebsiteRouter(ctx context.Context) *mux.Router {
 		// then proxy to a local webpack development server
 		// i.e. we're developing wg-access-server locally
 		util.Logger(ctx).Info("serving website from webpack dev server")
-		u, _ := url.Parse("http://10.0.0.24:3000/auth/login")
+		u, _ := url.Parse(fmt.Sprintf("%s/auth/login", config.Spec.RootURL))
 		router.NotFoundHandler = httputil.NewSingleHostReverseProxy(u)
 	} else {
 		// if the static files directory exists then

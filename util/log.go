@@ -52,7 +52,7 @@ func Logger(ctx context.Context) *otelzap.LoggerWithCtx {
 		ctx = context.Background()
 	}
 
-	l := otelzap.New(newLogger, otelzap.WithTraceIDField(true), otelzap.WithMinLevel(logLevel), otelzap.WithStackTrace(true)).Ctx(ctx)
+	l := otelzap.New(newLogger, otelzap.WithMinLevel(logLevel), otelzap.WithStackTrace(true)).Ctx(ctx)
 	return &l
 }
 

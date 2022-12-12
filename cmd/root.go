@@ -163,5 +163,4 @@ func InitConfig() {
 		}
 		config.Spec.WG.PrivateKey = key.String()
 	}
-
 }
